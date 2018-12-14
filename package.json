@@ -1,0 +1,24 @@
+{
+  "name": "generic-speck",
+  "version": "1.0.0",
+  "description": "Generalized version of the Speck cipher for integer obfuscation",
+  "main": "speck.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qgustavor/generick-speck.git"
+  },
+  "keywords": [
+    "speck",
+    "obfuscation",
+    "cipher"
+  ],
+  "author": "qgustavor",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qgustavor/generick-speck/issues"
+  },
+  "homepage": "https://github.com/qgustavor/generick-speck#readme"
+}
