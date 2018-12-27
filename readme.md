@@ -66,7 +66,7 @@ What each parameter does:
 * Setting `rounds` to a too large number will make it slower but not necessary safer;
 * Using keys with many words (integers) will not make it safer as some of those may be not used;
 * Speck is a cipher, but don't use this library for encryption: it was not intended neither tested for that;
-* It supports up to 52-bit sized blocks and those are only safe [as long you can avoid some attacks](https://crypto.stackexchange.com/a/8570), then don't use this if you're generating too many IDs, otherwise you may risk a [birthday attack](https://en.wikipedia.org/wiki/Birthday_attack). Use other cipher for that, more info on the [research section](#research).
+* It supports up to 52-bit sized blocks and those are only safe [as long you can avoid some attacks](https://crypto.stackexchange.com/a/8570). If you're generating too many IDs it's better to use other cipher for that, more info on the [research section](#research) and [issue #1](https://github.com/qgustavor/generic-speck/issues/1).
 
 ### Formatting
 
@@ -80,7 +80,7 @@ const base32 = '23456789ABCDEFGHIJKMNPQRSTUVWXYZ'
 const base20 = '23456789CFGHJMPQRVWX'
 const base10 = '0123456789'
 
-// To format use .format(value, alphabet, [maxValue])
+// To format use format.encode(value, alphabet, [maxValue])
 format.encode(99, base64) // 'Bj'
 format.encode(99, base32) // '55'
 format.encode(99, base20) // '6X'
@@ -92,7 +92,7 @@ format.encode(100, base32, 256) // '255'
 format.encode(100, base20, 256) // '26X'
 format.encode(100, base10, 256) // '099'
 
-// To decode use .decode(value, alphabet, [throwIfUnrecognized])
+// To decode use format.decode(value, alphabet, [throwIfUnrecognized])
 format.decode('Bj', base64) // 99
 format.decode('55', base32) // 99
 format.decode('6X', base20) // 99
@@ -129,11 +129,11 @@ Following [some of those answers](https://stackoverflow.com/q/8554286) I decided
 
 Speck [was suggested here](https://stackoverflow.com/a/8554984) and [seemed simple to implement](https://en.wikipedia.org/wiki/Speck_(cipher)#Reference_code). Other option could be [XXTEA](https://en.wikipedia.org/wiki/XXTEA) but it seemed harder to implement and there's an full attack published on it.
 
-Turned that Speck is not just easy to implement but can be generalized to any block size which is multiple to 2 bits. As it's quite hard to find something that's not a multiple of 2 bits seems it can be used as a format-preserving encryption (but I couldn't find any cryptoanalysis done on that). Because limitations on how JavaScript handles integers and bitwise operators this library supports block ciphers from 16-bit to 52-bit.
+Turned that Speck is not just easy to implement but can be generalized to any block size which is multiple to 2 bits. As it's quite hard to find something that's not a multiple of 2 bits seems it can be used as a format-preserving encryption (but I couldn't find any cryptanalysis done on that). Because limitations on how JavaScript handles integers and bitwise operators this library supports block ciphers from 16-bit to 52-bit.
 
 ----
 
-Something that got my atention is YouTube: some of above links shown that it uses Base64 (specifically the URL variant). If you take a video ID, like `jNQXAC9IVRw`, and decode you get a 64-bit result, like `<Buffer 8c d4 17 00 2f 48 55 1c>`. That's the same size of the block size of DES/3DES and Blowfish ciphers. Based on that I imagine YouTube is using something like using internally something like Instagram ([11]) or Twitter and encrypting this ID using some 64-bit block cipher.
+Something that got my attention is YouTube: some of above links shown that it uses Base64 (specifically the URL variant). If you take a video ID, like `jNQXAC9IVRw`, and decode you get a 64-bit result, like `<Buffer 8c d4 17 00 2f 48 55 1c>`. That's the same size of the block size of DES/3DES and Blowfish ciphers. Based on that I imagine YouTube is using something like using internally something like Instagram ([11]) or Twitter and encrypting this ID using some 64-bit block cipher.
 
 Then if someone wants to obfuscate a large number of IDs like YouTube or Instagram the best option would be using other block cipher, like 3DES or Blowfish, which is quite easy to implement using [the crypto module](https://nodejs.org/api/crypto.html).
 
