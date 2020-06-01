@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang=en>
+<meta charset=utf-8>
+<title>Generic Speck</title>
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+
+<body>
+<div class="container grid-sm my-2"><div class="columns"><div class="column">
+
+<h1>Generic Speck Demos</h1>
+
+<p style="display:none" id="load-error">Your browser don't support ES modules. Please upgrade it.</p>
+
+<script nomodule>document.getElementById('load-error').style.display = 'block'</script>
+
+<h2>Basic demo</h2>
+
+<p>Enter a number between 0 and 4294967295 (2<sup>32</sup> - 1) and it will return an obfuscated result in the same range. Keys are a list of numbers between 0 and 65535 (2<sup>16</sup> - 1).</p>
+
+<form class="form-horizontal" id="basic-demo">
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__key">Key</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="text" id="input__key">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__input">Input</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="number" id="input__input" value="0" min="0" max="4294967295">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__output">Output</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="text" readonly id="input__output">
+    </div>
+  </div>
+</form>
+
+<h2>Visual demo</h2>
+
+<p>In the left there is a 256x256 image where each pixel color is determined by the formula <code>r=x g=y b=0</code>, in the right there is a image where the colors are taken using the obfuscation function like this <code>[r, g] = encrypt(x, y) b=0</code>. Every color from the first image appears in the second image.</p>
+
+<canvas id="originalImage" width="256" height="256"></canvas>
+<canvas id="obfuscatedImage" width="256" height="256"></canvas>
+
+<p>Keys are a list of numbers between 0 and 255 (2<sup>8</sup> - 1). Rounds can lowered down to one so you can see somewhat how the obfuscation works. Setting rotations to any number higher than the half block size (8) breaks the function.</p>
+
+<form class="form-horizontal" id="canvas-demo">
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__key2">Key</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="text" id="input__key2" value="0, 0, 0, 0">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__input">Rounds</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="number" id="input__rounds" value="22" min="1" step="1">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__leftrot">Left rotations</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="number" id="input__leftrot" value="7" min="1" max="10" step="1">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__rightrot">Right rotations</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="number" id="input__rightrot" value="2" min="1" max="10" step="1">
+    </div>
+  </div>
+</form>
+
+<script type="module">
+import createSpeck from './speck.jsm'
+const $ = id => document.getElementById(id)
+
+// Basic demo code
+function runBasicDemo () {
+  const key = ($('input__key').value.match(/\d+/g) || []).map(e => Number(e) & 0xFFFF)
+  const speck = createSpeck()
+  $('input__output').value = speck.encrypt($('input__input').value, key)
+}
+
+$('input__key').value = Array.from(crypto.getRandomValues(new Uint16Array(4))).join(', ')
+$('basic-demo').addEventListener('input', runBasicDemo)
+runBasicDemo()
+
+// Canvas demo code
+const originalImage = $('originalImage')
+const obfuscatedImage = $('obfuscatedImage')
+
+const originalCtx = originalImage.getContext('2d')
+const originalData = originalCtx.createImageData(256, 256)
+
+for (let x = 0; x < 256; x++) {
+  for (let y = 0; y < 256; y++) {
+    const index = (x * 256 + y) * 4
+    originalData.data[index] = x
+    originalData.data[index + 1] = y
+    originalData.data[index + 3] = 255
+  }
+}
+
+originalCtx.putImageData(originalData, 0, 0)
+
+const obfuscatedCtx = obfuscatedImage.getContext('2d')
+$('input__key2').value = Array.from(crypto.getRandomValues(new Uint8Array(8))).join(', ')
+
+const generateObfuscatedData = () => {
+  const key = ($('input__key2').value.match(/\d+/g) || []).map(e => Number(e) & 0xFF)
+  const speck = createSpeck({
+    bits: 8,
+    rounds: Number($('input__rounds').value),
+    rightRotations: Number($('input__rightrot').value),
+    leftRotations: Number($('input__leftrot').value)
+  })
+
+  const obfuscatedData = obfuscatedCtx.createImageData(256, 256)
+  for (let x = 0; x < 256; x++) {
+    for (let y = 0; y < 256; y++) {
+      const index = (x * 256 + y) * 4
+      const cipher = speck.encryptRaw([x, y], key)
+      obfuscatedData.data[index] = cipher[0]
+      obfuscatedData.data[index + 1] = cipher[1]
+      obfuscatedData.data[index + 3] = 255
+    }
+  }
+  obfuscatedCtx.putImageData(obfuscatedData, 0, 0)
+}
+
+$('canvas-demo').addEventListener('input', generateObfuscatedData)
+generateObfuscatedData()
+</script>
+
+<hr>
+
+<p><a href="https://github.com/qgustavor/generic-speck">Return to the project page</a></p>
+
+</div></div></div>

@@ -3,6 +3,8 @@
 A generic implementation of the [Speck cipher](https://en.wikipedia.org/wiki/Speck_%28cipher%29) focused
 on integer obfuscation. If supports from 16-bit integers to 52-bit integers.
 
+[**Check the demo**](https://qgustavor.github.io/generic-speck/demo.html).
+
 ## Why?
 
 Because I wanted to obfuscate integers and the current libraries focused more on the encoding process
@@ -10,18 +12,17 @@ and not on the obfuscation process, thus seemed not secure. More info on the [re
 
 ## How to use
 
-First install it (often using NPM or yarn), then you can require the library like this:
-
 ```javascript
-const GenericSpeck = require('generic-speck')
+// If you're using Node then you need to install it (often using NPM or yarn)
+// then you can require the library like this:
+const createSpeck = require('generic-speck')
 
-// The default export is a constructor function
-// so you need to create a new instance
-// (it's not a class so "new" is not needed)
+// If you're using Deno or running code in a browser you can use this:
+import createSpeck from 'https://unpkg.com/generic-speck/speck.mjs'
 
 // The following are the default parameters
 // More info on the parameters section.
-const speck = GenericSpeck({
+const speck = createSpeck({
   bits: 16,
   rounds: 22,
   rightRotations: 7,
@@ -29,7 +30,7 @@ const speck = GenericSpeck({
 })
 
 // Then you need to generate a key: it's an array with two or more
-// integers ranging from 0 to 2 ^ (bits). Here's a 64 bit key:
+// integers ranging from 0 to 2 ^ (bits) - 1. Here's a 64 bit key:
 const key = [0x0100, 0x0908, 0x1110, 0x1918]
 
 // As you can use multiple keys for multiple contexts the key option
@@ -73,8 +74,13 @@ What each parameter does:
 The library includes a small helper format function:
 
 ```javascript
+// Load the format functions using CommonJS...
 const format = require('generic-speck/format')
 
+// ... or ES modules
+import * as format from 'https://unpkg.com/generic-speck/format.mjs'
+
+// Then create an alphabet
 const base64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 const base32 = '23456789ABCDEFGHIJKMNPQRSTUVWXYZ'
 const base20 = '23456789CFGHJMPQRVWX'
@@ -130,6 +136,8 @@ Following [some of those answers](https://stackoverflow.com/q/8554286) I decided
 Speck [was suggested here](https://stackoverflow.com/a/8554984) and [seemed simple to implement](https://en.wikipedia.org/wiki/Speck_(cipher)#Reference_code). Other option could be [XXTEA](https://en.wikipedia.org/wiki/XXTEA) but it seemed harder to implement and there's an full attack published on it.
 
 Turned that Speck is not just easy to implement but can be generalized to any block size which is multiple to 2 bits. As it's quite hard to find something that's not a multiple of 2 bits seems it can be used as a format-preserving encryption (but I couldn't find any cryptanalysis done on that). Because limitations on how JavaScript handles integers and bitwise operators this library supports block ciphers from 16-bit to 52-bit.
+
+I'm currently using it to obfuscate identifiers [in this website](https://erros-da-cr.neocities.org/en/). Some example obfuscated IDs: `RD5JM2`, `6JYX3I`, `Q3CXRF`, `2FE8MJ` and `2J8QPB`.
 
 ----
 
