@@ -6,6 +6,12 @@
   "scripts": {
     "test": "node test.js"
   },
+  "files": [
+    "speck.js",
+    "speck.mjs",
+    "format.js",
+    "format.mjs"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/qgustavor/generick-speck.git"
