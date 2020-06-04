@@ -133,7 +133,7 @@ I checked the following packages:
 
 Following [some of those answers](https://stackoverflow.com/q/8554286) I decided trying some encryption related method. From the packages from NPM there's [node-fpe](https://www.npmjs.com/package/node-fpe) but [it's just a substitution cipher](https://runkit.com/embed/41ramg6ejgz0): I need to find a block cipher.
 
-Speck [was suggested here](https://stackoverflow.com/a/8554984) and [seemed simple to implement](https://en.wikipedia.org/wiki/Speck_(cipher)#Reference_code). Other option could be [XXTEA](https://en.wikipedia.org/wiki/XXTEA) but it seemed harder to implement and there's an full attack published on it.
+Speck [was suggested here](https://stackoverflow.com/a/8554984) and [seemed simple to implement](https://en.wikipedia.org/wiki/Speck_(cipher)#Reference_code). Other option could be [XXTEA](https://en.wikipedia.org/wiki/XXTEA) but it seemed harder to implement and there's a full attack published on it.
 
 Turned that Speck is not just easy to implement but can be generalized to any block size which is multiple to 2 bits. As it's quite hard to find something that's not a multiple of 2 bits seems it can be used as a format-preserving encryption (but I couldn't find any cryptanalysis done on that). Because limitations on how JavaScript handles integers and bitwise operators this library supports block ciphers from 16-bit to 52-bit.
 
