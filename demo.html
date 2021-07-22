@@ -17,7 +17,7 @@
 
 <p>Enter a number between 0 and 4294967295 (2<sup>32</sup> - 1) and it will return an obfuscated result in the same range. Keys are a list of numbers between 0 and 65535 (2<sup>16</sup> - 1).</p>
 
-<form class="form-horizontal" id="basic-demo">
+<form class="form-horizontal">
   <div class="form-group">
     <div class="col-3 col-sm-12">
       <label class="form-label" for="input__key">Key</label>
@@ -39,7 +39,15 @@
       <label class="form-label" for="input__output">Output</label>
     </div>
     <div class="col-9 col-sm-12">
-      <input class="form-input" type="text" readonly id="input__output">
+      <input class="form-input" type="text" id="input__output">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__output">Formatted output</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="text" id="input__formatted_output">
     </div>
   </div>
 </form>
@@ -90,18 +98,43 @@
 
 <script type="module">
 import createSpeck from './speck.mjs'
+import { encode, decode } from './format.mjs'
 const $ = id => document.getElementById(id)
 
+const formatAlphabet = '0123456789ABCDEF'
+const maxValue = 4294967295
+
 // Basic demo code
-function runBasicDemo () {
+function runEncryptDemo () {
   const key = ($('input__key').value.match(/\d+/g) || []).map(e => Number(e) & 0xFFFF)
   const speck = createSpeck()
-  $('input__output').value = speck.encrypt($('input__input').value, key)
+  const value = speck.encrypt($('input__input').value, key)
+  $('input__output').value = value
+  $('input__formatted_output').value = encode(value, formatAlphabet, maxValue)
+}
+
+function runDecryptDemo (isFormattedEdit) {
+  const key = ($('input__key').value.match(/\d+/g) || []).map(e => Number(e) & 0xFFFF)
+  const speck = createSpeck()
+  const value = speck.decrypt($('input__output').value, key)
+  $('input__input').value = value
+  if (!isFormattedEdit) {
+    $('input__formatted_output').value = encode(value, formatAlphabet, maxValue)
+  }
 }
 
 $('input__key').value = Array.from(crypto.getRandomValues(new Uint16Array(4))).join(', ')
-$('basic-demo').addEventListener('input', runBasicDemo)
-runBasicDemo()
+$('input__input').addEventListener('input', runEncryptDemo)
+runEncryptDemo()
+
+$('input__output').addEventListener('input', () => {
+  runDecryptDemo()
+})
+
+$('input__formatted_output').addEventListener('input', () => {
+  $('input__output').value = decode($('input__formatted_output').value, formatAlphabet, maxValue)
+  runDecryptDemo(true)
+})
 
 // Canvas demo code
 const originalImage = $('originalImage')

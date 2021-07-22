@@ -1,4 +1,4 @@
-export default function speck (params = {}) {
+export default function createSpeck (params = {}) {
   const BITS = params.bits || 16
   const ROUNDS = params.rounds || 22
   const RIGHT_ROTATIONS = params.rightRotations || 7
