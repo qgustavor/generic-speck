@@ -15,7 +15,7 @@
 
 <h2>Basic demo</h2>
 
-<p>Enter a number between 0 and 4294967295 (2<sup>32</sup> - 1) and it will return an obfuscated result in the same range. Keys are a list of numbers between 0 and 65535 (2<sup>16</sup> - 1).</p>
+<p>Enter a number between 0 and 1073741823 (2<sup>30</sup> - 1) and it will return an obfuscated result in the same range. Keys are a list of numbers between 0 and 32767 (2<sup>15</sup> - 1), the default in this demo being randomly generated. It will be formatted using a base 32 alphabet (23&#8203;45&#8203;67&#8203;89&#8203;AB&#8203;CD&#8203;EF&#8203;GH&#8203;IJ&#8203;KM&#8203;NP&#8203;QR&#8203;ST&#8203;UV&#8203;WX&#8203;YZ).</p>
 
 <form class="form-horizontal">
   <div class="form-group">
@@ -31,7 +31,7 @@
       <label class="form-label" for="input__input">Input</label>
     </div>
     <div class="col-9 col-sm-12">
-      <input class="form-input" type="number" id="input__input" value="0" min="0" max="4294967295">
+      <input class="form-input" type="number" id="input__input" value="0" min="0" max="1073741823">
     </div>
   </div>
   <div class="form-group">
@@ -39,7 +39,7 @@
       <label class="form-label" for="input__output">Output</label>
     </div>
     <div class="col-9 col-sm-12">
-      <input class="form-input" type="text" id="input__output">
+      <input class="form-input" type="number" id="input__output">
     </div>
   </div>
   <div class="form-group">
@@ -51,6 +51,8 @@
     </div>
   </div>
 </form>
+
+<p>Because the number of the bits in the output (30) is multiple of the number of bits of each character from the alphabet (5) it will generate a 6 length string (30/5) with an uniform distribution for every character.</p>
 
 <h2>Visual demo</h2>
 
@@ -101,13 +103,13 @@ import createSpeck from './speck.mjs'
 import { encode, decode } from './format.mjs'
 const $ = id => document.getElementById(id)
 
-const formatAlphabet = '0123456789ABCDEF'
-const maxValue = 4294967295
+const formatAlphabet = '23456789ABCDEFGHIJKMNPQRSTUVWXYZ'
+const maxValue = 1073741823
 
 // Basic demo code
 function runEncryptDemo () {
   const key = ($('input__key').value.match(/\d+/g) || []).map(e => Number(e) & 0xFFFF)
-  const speck = createSpeck()
+  const speck = createSpeck({ bits: 15 })
   const value = speck.encrypt($('input__input').value, key)
   $('input__output').value = value
   $('input__formatted_output').value = encode(value, formatAlphabet, maxValue)
@@ -115,15 +117,21 @@ function runEncryptDemo () {
 
 function runDecryptDemo (isFormattedEdit) {
   const key = ($('input__key').value.match(/\d+/g) || []).map(e => Number(e) & 0xFFFF)
-  const speck = createSpeck()
-  const value = speck.decrypt($('input__output').value, key)
+  const speck = createSpeck({ bits: 15 })
+  const outputValue = $('input__output').value
+  const value = speck.decrypt(outputValue, key)
   $('input__input').value = value
   if (!isFormattedEdit) {
-    $('input__formatted_output').value = encode(value, formatAlphabet, maxValue)
+    $('input__formatted_output').value = encode(outputValue, formatAlphabet, maxValue)
   }
 }
 
-$('input__key').value = Array.from(crypto.getRandomValues(new Uint16Array(4))).join(', ')
+const initialKey = []
+while (initialKey.length < 4) {
+  const value = crypto.getRandomValues(new Uint16Array(1))[0]
+  if (value <= 32767) initialKey.push(value)
+}
+$('input__key').value = initialKey.join(', ')
 $('input__input').addEventListener('input', runEncryptDemo)
 runEncryptDemo()
 
