@@ -46,10 +46,11 @@ const deobfuscatedInteger = speck.decrypt(obfuscatedInteger, key)
 console.log(obfuscatedInteger) // 0x694c6574
 ```
 
+The values above look random but are based on the test vectors from the specification so this library can be validated against it. The endianness of the test vectors showed above is little-endian while the test vectors in the Speck specification is big-endian. This is not a big issue. For more info on this [check Wikipedia's section on Endianness](https://en.wikipedia.org/wiki/Speck_%28cipher%29#Endianness).
+
 ### Parameters
 
-As this is a generalized Speck implementation it's possible to configure the
-internal parameters it's going to use. When possible use parameters from the Speck specification ([PDF](https://eprint.iacr.org/2013/404.pdf#page=17)) as those were the ones which were analyzed against attacks.
+As this is a generalized Speck implementation it's possible to configure the internal parameters it's going to use. When possible use parameters from the Speck specification ([PDF](https://eprint.iacr.org/2013/404.pdf#page=17)) as those were the ones which were analyzed against attacks.
 
 * Speck32/64: `{bits: 16, rounds: 22, rightRotations: 7, leftRotations: 2}`, keys must consist of four 16-bit integers;
 * Speck48/64: `{bits: 24, rounds: 22, rightRotations: 8, leftRotations: 3}`, keys must consist of three 24-bit integers;
