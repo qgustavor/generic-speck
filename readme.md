@@ -17,7 +17,7 @@ and not on the obfuscation process, thus seemed not secure. More info on the [re
 // then you can require the library like this:
 const createSpeck = require('generic-speck')
 
-// If you're using Deno or running code in a browser you can use this:
+// If you're running code in a browser you can use this:
 import createSpeck from 'https://unpkg.com/generic-speck/speck.mjs'
 
 // The following are the default parameters
