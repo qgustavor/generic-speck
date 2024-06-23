@@ -3,7 +3,7 @@
 A generic implementation of the [Speck cipher](https://en.wikipedia.org/wiki/Speck_%28cipher%29) focused
 on integer obfuscation. If supports from 16-bit integers to 52-bit integers.
 
-[**Check the demo**](https://qgustavor.github.io/generic-speck/demo.html).
+[**Check the demo**](https://qgustavor.github.io/generic-speck/demo.html)
 
 ## Why?
 
@@ -124,21 +124,21 @@ I needed a way to obfuscate integers I use for IDs which met the following requi
 * It shouldn't be a pre-generated shuffled list ([9]);
 * Best if there's no published attacks against it ([10]);
 * Best if it can be plugged to internal ID schemes ([11]);
-* Best if it don't wastes space (a sort of [format-preserving encryption]);
-* The encoding doesn't matters ([12]);
+* Best if it don't waste space (a sort of [format-preserving encryption]);
+* The encoding doesn't matter ([12]);
 
 I checked the following packages:
 
 * [hashids](https://www.npmjs.com/package/hashids): its documentation says "this algorithm does try to make these ids random and unpredictable" but after working with it I noticed that seems it leaks part of the original integer size. [It also wastes space](https://runkit.com/embed/o4nhrey4e7mj): Base64 can encode any integer from 0 to 4095 using just two characters, Base32 can encode from 0 to 1023 also using two characters, but it uses three for less than that;
 * [optimus-js](https://www.npmjs.com/package/optimus-js): can encode up to 2,147,483,647 (31 bits);
 
-Following [some of those answers](https://stackoverflow.com/q/8554286) I decided trying some encryption related method. From the packages from NPM there's [node-fpe](https://www.npmjs.com/package/node-fpe) but [it's just a substitution cipher](https://runkit.com/embed/41ramg6ejgz0): I need to find a block cipher.
+Following [some of those answers](https://stackoverflow.com/q/8554286) I decided trying some encryption related method. From the packages from NPM there's [node-fpe](https://www.npmjs.com/package/node-fpe) but [it's just a substitution cipher](https://runkit.com/embed/41ramg6ejgz0), which, at the time I wrote this library, wasn't disclosed in node-fpe's README. That's not suitable as it's easier to reverse than using a block cipher.
 
 Speck [was suggested here](https://stackoverflow.com/a/8554984) and [seemed simple to implement](https://en.wikipedia.org/wiki/Speck_(cipher)#Reference_code). Other option could be [XXTEA](https://en.wikipedia.org/wiki/XXTEA) but it seemed harder to implement and there's a full attack published on it.
 
 Turned that Speck is not just easy to implement but can be generalized to any block size which is multiple to 2 bits. As it's quite hard to find something that's not a multiple of 2 bits seems it can be used as a format-preserving encryption (but I couldn't find any cryptanalysis done on that). Because limitations on how JavaScript handles integers and bitwise operators this library supports block ciphers from 16-bit to 52-bit.
 
-I'm currently using it to obfuscate identifiers [in this website](https://erros-da-cr.neocities.org/en/). Some example obfuscated IDs: `RD5JM2`, `6JYX3I`, `Q3CXRF`, `2FE8MJ` and `2J8QPB`.
+I was using it to obfuscate identifiers [in this abandoned website](https://erros-da-cr.neocities.org/en/). Some example obfuscated IDs: `RD5JM2`, `6JYX3I`, `Q3CXRF`, `2FE8MJ` and `2J8QPB`.
 
 ----
 
