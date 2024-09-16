@@ -98,6 +98,28 @@
   </div>
 </form>
 
+<h2>Obfuscated image demo</h2>
+
+<p>Just for fun, here is a scrambled image and, on the right, if you guess the key used to scramble, is a unscrambled version.</p>
+
+<canvas id="funOriginalImage" width="256" height="256"></canvas>
+<canvas id="funDeobfuscatedImage" width="256" height="256"></canvas>
+
+<p>The key you enter will be processed using SHA-1 then used as a key for a <code>createSpeck</code> function and processed like the above demo, but using the left image as source instead of <code>r=x g=y b=0</code>.</p>
+
+<form class="form-horizontal" id="fun-demo">
+  <div class="form-group">
+    <div class="col-3 col-sm-12">
+      <label class="form-label" for="input__key3">Key</label>
+    </div>
+    <div class="col-9 col-sm-12">
+      <input class="form-input" type="text" id="input__key3" value="">
+    </div>
+  </div>
+</form>
+
+<p><em>Tip:</em> the key is the name of the colorful object in the image.</p>
+
 <script type="module">
 import createSpeck from './speck.mjs'
 import { encode, decode } from './format.mjs'
@@ -189,6 +211,51 @@ const generateObfuscatedData = () => {
 
 $('canvas-demo').addEventListener('input', generateObfuscatedData)
 generateObfuscatedData()
+
+// Fun image obfuscation demo
+const funOriginalImage = $('funOriginalImage')
+const funDeobfuscatedImage = $('funDeobfuscatedImage')
+const funOriginalCtx = funOriginalImage.getContext('2d')
+const funDeobfuscatedCtx = funDeobfuscatedImage.getContext('2d')
+
+const deobfuscateImage = async () => {
+  // Handle string -> SHA-1
+  const keyString = $('input__key3').value.trim().toLowerCase()
+  const keyArray = new TextEncoder().encode(keyString)
+  const keyBuffer = await window.crypto.subtle.digest({ name: 'SHA-1' }, keyArray)
+  const key = new Uint8Array(keyBuffer)
+
+  // This challenge should be easy, but just to make it easier for someone
+  // trying to brute force, it uses just 8 rounds (so just the first 8 bytes
+  // of the 20 byte SHA-1 derived key), also making it faster to process.
+  const speck = createSpeck({ bits: 8, rounds: 8 })
+
+  const originalData = funOriginalCtx.getImageData(0, 0, 256, 256)
+  const deobfuscatedData = funDeobfuscatedCtx.createImageData(256, 256)
+  for (let x = 0; x < 256; x++) {
+    for (let y = 0; y < 256; y++) {
+      const cipher = speck.decryptRaw([x, y], key)
+      const sourceIndex = (x * 256 + y) * 4
+      const targetIndex = (cipher[0] * 256 + cipher[1]) * 4
+
+      deobfuscatedData.data[targetIndex] = originalData.data[sourceIndex]
+      deobfuscatedData.data[targetIndex + 1] = originalData.data[sourceIndex + 1]
+      deobfuscatedData.data[targetIndex + 2] = originalData.data[sourceIndex + 2]
+      deobfuscatedData.data[targetIndex + 3] = 255
+    }
+  }
+
+  funDeobfuscatedCtx.putImageData(deobfuscatedData, 0, 0)
+}
+
+$('fun-demo').addEventListener('input', deobfuscateImage)
+
+const funImage = new Image()
+funImage.src = 'fun-demo-image.png'
+funImage.addEventListener('load', () => {
+  funOriginalCtx.drawImage(funImage, 0, 0)
+  deobfuscateImage()
+})
 </script>
 
 <hr>
