@@ -3,28 +3,43 @@
   "version": "1.1.1",
   "description": "Generalized version of the Speck cipher for integer obfuscation",
   "main": "speck.js",
+  "module": "speck.mjs",
+  "types": "./speck.d.cts",
   "scripts": {
     "test": "node test.js"
+  },
+  "exports": {
+    ".": {
+      "import": { "types": "./speck.d.mts", "default": "./speck.mjs" },
+      "require": { "types": "./speck.d.cts", "default": "./speck.js" }
+    },
+    "./format": {
+      "import": { "types": "./format.d.mts", "default": "./format.mjs" },
+      "require": { "types": "./format.d.cts", "default": "./format.js" }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "format": ["./format.d.cts"]
+    }
   },
   "files": [
     "speck.js",
     "speck.mjs",
+    "speck.d.cts",
+    "speck.d.mts",
     "format.js",
-    "format.mjs"
+    "format.mjs",
+    "format.d.cts",
+    "format.d.mts"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/qgustavor/generick-speck.git"
+    "url": "git+https://github.com/qgustavor/generic-speck.git"
   },
-  "keywords": [
-    "speck",
-    "obfuscation",
-    "cipher"
-  ],
+  "keywords": ["speck", "obfuscation", "cipher"],
   "author": "qgustavor",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/qgustavor/generick-speck/issues"
-  },
-  "homepage": "https://github.com/qgustavor/generick-speck#readme"
+  "bugs": { "url": "https://github.com/qgustavor/generic-speck/issues" },
+  "homepage": "https://github.com/qgustavor/generic-speck#readme"
 }
